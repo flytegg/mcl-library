@@ -68,15 +68,14 @@ public class MCLicense {
 
             // Send request to the validation server with properly encoded parameters
             String nonce = UUID.randomUUID().toString();
-            String serverIp = InetAddress.getLocalHost().getHostAddress() + ":" + plugin.getServer().getPort();
+            String sessionId = UUID.randomUUID().toString();
 
             // Properly encode all URL components
             String encodedPluginId = URLEncoder.encode(pluginId, StandardCharsets.UTF_8.toString()).replace("+", "%20");
             String encodedKey = URLEncoder.encode(key, StandardCharsets.UTF_8.toString()).replace("+", "%20");
-            String encodedServerIp = URLEncoder.encode(serverIp, StandardCharsets.UTF_8.toString()).replace("+", "%20");
 
             URL url = new URL(String.format(Constants.API_URL, encodedPluginId, encodedKey) +
-                    "?serverIp=" + encodedServerIp +
+                    "?serverIp=" + sessionId +
                     "&nonce=" + nonce);
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
@@ -152,7 +151,7 @@ public class MCLicense {
                 return false;
             }
 
-            HeartbeatManager.startHeartbeat(plugin, pluginId, key, serverIp);
+            HeartbeatManager.startHeartbeat(plugin, pluginId, key, sessionId);
             Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
             return true;
         } catch (Exception e) {

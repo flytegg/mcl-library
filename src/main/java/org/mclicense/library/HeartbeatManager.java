@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.mclicense.library.Constants.HEARTBEAT_URL;
@@ -18,14 +19,14 @@ import static org.mclicense.library.Constants.TIMEOUT_MS;
 class HeartbeatManager {
     private static String pluginId;
     private static String licenseKey;
-    private static String serverIp;
+    private static String sessionId;
 
-    protected static void startHeartbeat(JavaPlugin plugin, String pluginId, String licenseKey, String serverIp) {
+    protected static void startHeartbeat(JavaPlugin plugin, String pluginId, String licenseKey, String sessionId) {
         plugin.getServer().getPluginManager().registerEvents(new ShutdownListener(plugin), plugin);
 
         HeartbeatManager.pluginId = pluginId;
         HeartbeatManager.licenseKey = licenseKey;
-        HeartbeatManager.serverIp = serverIp;
+        HeartbeatManager.sessionId = sessionId;
 
         try {
             Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
@@ -49,7 +50,8 @@ class HeartbeatManager {
 
             // Create JSON payload
             JSONObject payload = new JSONObject();
-            payload.put("serverIp", serverIp);
+            // This really should be changed to sessionId, but will require a lot of backend changes
+            payload.put("serverIp", sessionId);
             if (isShutdown) {
                 payload.put("shutdown", true);
             }
