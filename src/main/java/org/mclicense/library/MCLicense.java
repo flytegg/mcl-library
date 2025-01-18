@@ -33,7 +33,7 @@ public class MCLicense {
      *     <li>Checks if the license is valid and not expired, reached max IPs, etc</li>
      * </ul>
      *
-     * The license key should be placed in a file named 'mclicense.txt' in the plugin's data folder by the user.
+     * The license key should be placed in a file named 'mclicense.txt' in the plugin's data folder by the user, or be hardcoded by a marketplace.
      *
      * @param plugin The JavaPlugin instance requesting validation
      * @param pluginId The unique identifier assigned to your plugin by MCLicense
