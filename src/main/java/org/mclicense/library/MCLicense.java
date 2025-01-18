@@ -45,25 +45,26 @@ public class MCLicense {
         try {
             // Check if license file exists or create it
             File licenseFile = new File(plugin.getDataFolder(), "mclicense.txt");
+            String fileContent = "";
             if (!licenseFile.exists()) {
                 plugin.getDataFolder().mkdirs();
                 licenseFile.createNewFile();
+            } else {
+                fileContent = new String(Files.readAllBytes(Paths.get(licenseFile.getPath())), StandardCharsets.UTF_8).trim();
+            }
 
-                // If hardcoded license key is provided by marketplace, write to file and continue validation
-                String hardcodedLicense = MarketplaceProvider.getHardcodedLicense();
-                if (hardcodedLicense == null) {
+
+            // Read the license key from the file
+            String key = fileContent;
+            if (key.isEmpty()) {
+                // Assuming first run, use hardcoded if exists, else prompt
+                String hardcodedKey = MarketplaceProvider.getHardcodedLicense();
+                if (hardcodedKey != null) {
+                    key = hardcodedKey;
+                } else {
                     Constants.LOGGER.info("License key is empty for " + plugin.getName() + "! Place your key in the 'mclicense.txt' file in the plugin folder and restart the server.");
                     return false;
                 }
-
-                Files.write(Paths.get(licenseFile.getPath()), hardcodedLicense.getBytes(StandardCharsets.UTF_8));
-            }
-
-            // Read the license key from the file
-            String key = new String(Files.readAllBytes(Paths.get(licenseFile.getPath())), StandardCharsets.UTF_8).trim();
-            if (key.isEmpty()) {
-                Constants.LOGGER.info("License key is empty for " + plugin.getName() + "! Place your key in the 'mclicense.txt' file in the plugin folder and restart the server.");
-                return false;
             }
 
             // Send request to the validation server with properly encoded parameters
@@ -153,6 +154,11 @@ public class MCLicense {
 
             HeartbeatManager.startHeartbeat(plugin, pluginId, key, sessionId);
             Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
+
+            // After validation succeeds, write new key to file we used hardcoded key
+            if (!key.equals(fileContent)) {
+                Files.write(licenseFile.toPath(), key.getBytes(StandardCharsets.UTF_8));
+            }
             return true;
         } catch (Exception e) {
             Constants.LOGGER.info("License validation failed for " + plugin.getName() + " (System error)");
