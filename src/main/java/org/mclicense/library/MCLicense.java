@@ -153,7 +153,13 @@ public class MCLicense {
             }
 
             HeartbeatManager.startHeartbeat(plugin, pluginId, key, sessionId);
-            Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
+
+            if (key.startsWith("spfinal_")) {
+                // Spigot first run
+                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "! Your new key for this Spigot resource was automatically placed in the mclicense.txt file.");
+            } else {
+                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
+            }
 
             // After validation succeeds, write new key to file we used hardcoded key
             if (!key.equals(fileContent)) {
