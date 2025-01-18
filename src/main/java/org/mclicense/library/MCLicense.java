@@ -161,7 +161,7 @@ public class MCLicense {
                 Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
             }
 
-            // After validation succeeds, write new key to file we used hardcoded key
+            // After validation succeeds, write new key to file if we used hardcoded key
             if (!key.equals(fileContent)) {
                 Files.write(licenseFile.toPath(), key.getBytes(StandardCharsets.UTF_8));
             }
