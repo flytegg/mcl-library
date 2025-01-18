@@ -154,16 +154,18 @@ public class MCLicense {
 
             HeartbeatManager.startHeartbeat(plugin, pluginId, key, sessionId);
 
-            if (key.startsWith("spfinal_")) {
-                // Spigot first run
-                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "! Your new key for this Spigot resource was automatically placed in the mclicense.txt file. Be sure to keep it safe, and contact the plugin author if you lose it.");
-            } else {
-                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
-            }
-
-            // After validation succeeds, write new key to file if we used hardcoded key
             if (!key.equals(fileContent)) {
+                if (key.startsWith("sp_")) {
+                    // First run Spigot activation
+                    Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "! Your new key for this Spigot resource was automatically placed in the mclicense.txt file. Be sure to keep it safe, and contact the plugin author if you lose it.");
+                } else {
+                    // First run Polymart or other marketplace
+                    Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
+                }
                 Files.write(licenseFile.toPath(), key.getBytes(StandardCharsets.UTF_8));
+            } else {
+                // Regular validation of existing key
+                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
             }
             return true;
         } catch (Exception e) {
