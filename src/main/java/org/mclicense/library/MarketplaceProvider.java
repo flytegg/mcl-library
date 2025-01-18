@@ -12,7 +12,7 @@ public class MarketplaceProvider {
         if (pmPlaceholder.equals("1") && !pmLicense.startsWith("%%__")) {
             return "pm_" + pmLicense;
         } else if (!spResource.startsWith("%%__") && !spUser.startsWith("%%__")) {
-            return "spraw_" + spResource + "_" + spUser;
+            return "spnew_" + spResource + "_" + spUser;
         }
         return null;
     }
