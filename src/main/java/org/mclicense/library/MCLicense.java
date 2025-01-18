@@ -156,7 +156,7 @@ public class MCLicense {
 
             if (key.startsWith("spfinal_")) {
                 // Spigot first run
-                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "! Your new key for this Spigot resource was automatically placed in the mclicense.txt file.");
+                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "! Your new key for this Spigot resource was automatically placed in the mclicense.txt file. Be sure to keep it safe, and contact the plugin author if you lose it.");
             } else {
                 Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
             }
