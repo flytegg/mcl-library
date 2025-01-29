@@ -39,7 +39,6 @@ class HeartbeatManager {
         try {
             URL url = new URL(String.format(HEARTBEAT_URL, pluginId, licenseKey));
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-
             connection.setRequestMethod("POST");
             connection.setRequestProperty("Content-Type", "application/json");
             connection.setConnectTimeout(TIMEOUT_MS);
