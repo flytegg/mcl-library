@@ -28,11 +28,9 @@ class HeartbeatManager {
         HeartbeatManager.licenseKey = licenseKey;
         HeartbeatManager.sessionId = sessionId;
 
-        try {
-            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
-
+        if (Constants.IS_FOLIA) {
             Bukkit.getAsyncScheduler().runAtFixedRate(plugin, (task) -> sendHeartbeat(false), Constants.HEARTBEAT_INTERVAL_SECONDS, Constants.HEARTBEAT_INTERVAL_SECONDS, TimeUnit.SECONDS);
-        } catch (ClassNotFoundException e) {
+        } else {
             Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> sendHeartbeat(false), Constants.HEARTBEAT_INTERVAL_SECONDS * 20, Constants.HEARTBEAT_INTERVAL_SECONDS * 20);
         }
     }
