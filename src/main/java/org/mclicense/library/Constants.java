@@ -28,4 +28,16 @@ class Constants {
             "0KZvQNIqzqTPBCR9VLZPBjFu6cYT/E/WUjjFROuRhi+7Xsa6tKLqoiO4VwJSrn5L\n" +
             "zwIDAQAB\n" +
             "-----END PUBLIC KEY-----";
+
+    // Folia Check
+    static final boolean IS_FOLIA = isRunningFolia();
+
+    private static boolean isRunningFolia() {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 }
