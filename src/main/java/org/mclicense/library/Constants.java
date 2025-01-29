@@ -10,6 +10,7 @@ class Constants {
     static final String API_BASE_URL = "https://api.mclicense.org";
     static final String API_URL = API_BASE_URL + "/validate/%s/%s";  // For license validation (pluginId, key)
     static final String HEARTBEAT_URL = API_BASE_URL + "/heartbeat/%s/%s";  // For heartbeat (pluginId, key)
+    static final String TEMP_LICENSE_URL = API_BASE_URL + "/check-temp/%s"; // For temp license polling (tempKey)
 
     // Connection Settings
     static final int TIMEOUT_MS = 5000;  // 5 second timeout for HTTP requests
