@@ -18,6 +18,7 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
+import java.util.Date;
 import java.util.UUID;
 
 public class MCLicense {
@@ -154,23 +155,30 @@ public class MCLicense {
 
             HeartbeatManager.startHeartbeat(plugin, pluginId, key, sessionId);
 
+            // First run, key in file not equal to key in jar
             if (!key.equals(fileContent)) {
-                if (key.startsWith("sp_")) {
-                    // First run Spigot activation
-                    Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "! Your new key for this Spigot resource was automatically placed in the mclicense.txt file. Be sure to keep it safe, and contact the plugin author if you lose it.");
-                } else {
-                    // First run Polymart or other marketplace
-                    Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
-                }
                 Files.write(licenseFile.toPath(), key.getBytes(StandardCharsets.UTF_8));
-            } else {
-                // Regular validation of existing key
-                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
             }
+
+            // Spigot temp license (which is currently valid)
+            if (key.startsWith("sptemp_")) {
+                Long deadline = Long.valueOf(responseJson.getString("message"));
+                // Startup poll to check for permanent
+                if (TempLicenseManager.poll(plugin, deadline, key)) {
+                    return true;
+                }
+
+                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "! Your license is temporary while we verify PayPal logs, the permanent one will soon be placed in your mclicense.txt automatically.");
+                TempLicenseManager.startPolling(plugin, deadline, key);
+                return true;
+            }
+
+            Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "!");
             return true;
         } catch (Exception e) {
             Constants.LOGGER.info("License validation failed for " + plugin.getName() + " (System error)");
             return false;
         }
     }
+
 }
