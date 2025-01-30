@@ -30,7 +30,7 @@ public class TempLicenseManager {
         }
     }
 
-    protected static boolean poll(JavaPlugin plugin, Long deadline, String tempLicense) {
+    private static boolean poll(JavaPlugin plugin, Long deadline, String tempLicense) {
         try {
             URL url = new URL(String.format(TEMP_LICENSE_URL, tempLicense));
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();

@@ -116,7 +116,7 @@ public class MCLicense {
             }
 
             // Verify key and pluginId are what was sent
-            if (!responseJson.getString("key").equals(key) || !responseJson.getString("pluginId").equals(pluginId)) {
+            if ((!key.startsWith("sptemp_") && !responseJson.getString("key").equals(key)) || !responseJson.getString("pluginId").equals(pluginId)) {
                 Constants.LOGGER.info("License validation failed for " + plugin.getName() + " (Key or pluginId mismatch)");
                 return false;
             }
@@ -162,14 +162,18 @@ public class MCLicense {
 
             // Spigot temp license (which is currently valid)
             if (key.startsWith("sptemp_")) {
-                Long deadline = Long.valueOf(responseJson.getString("message"));
-                // Startup poll to check for permanent
-                if (TempLicenseManager.poll(plugin, deadline, key)) {
+                // If we got back a different key than what we sent, it's our permanent key
+                String returnedKey = responseJson.getString("key");
+                if (!returnedKey.equals(key)) {
+                    Files.write(licenseFile.toPath(), returnedKey.getBytes(StandardCharsets.UTF_8));
+                    Constants.LOGGER.info("Your license for " + plugin.getName() + " was validated through PayPal, and your permanent key has been set in the mclicense.txt! Keep it safe, as you will have to contact the author if you lose it.");
                     return true;
                 }
 
-                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "! Your license is temporary while we verify PayPal logs, the permanent one will soon be placed in your mclicense.txt automatically.");
+                Long deadline = Long.valueOf(responseJson.getString("message"));
                 TempLicenseManager.startPolling(plugin, deadline, key);
+
+                Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "! Your license is temporary while we verify PayPal logs, the permanent one will soon be placed in your mclicense.txt automatically.");
                 return true;
             }
 
