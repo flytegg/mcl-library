@@ -22,17 +22,17 @@ public class TempLicenseManager {
     private static ScheduledTask foliaTask;
     private static BukkitTask bukkitTask;
 
-    protected static void startPolling(JavaPlugin plugin, Long deadline, String tempLicense) {
+    protected static void startPolling(JavaPlugin plugin, String pluginId, Long deadline, String tempLicense) {
         if (Constants.IS_FOLIA) {
-            foliaTask = Bukkit.getAsyncScheduler().runAtFixedRate(plugin, (task) -> poll(plugin, deadline, tempLicense), 60, 60, TimeUnit.SECONDS);
+            foliaTask = Bukkit.getAsyncScheduler().runAtFixedRate(plugin, (task) -> poll(plugin, pluginId, deadline, tempLicense), 60, 60, TimeUnit.SECONDS);
         } else {
-            bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> poll(plugin, deadline, tempLicense), 60 * 20, 60 * 20);
+            bukkitTask = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, () -> poll(plugin, pluginId, deadline, tempLicense), 60 * 20, 60 * 20);
         }
     }
 
-    private static boolean poll(JavaPlugin plugin, Long deadline, String tempLicense) {
+    private static boolean poll(JavaPlugin plugin, String pluginId, Long deadline, String tempLicense) {
         try {
-            URL url = new URL(String.format(TEMP_LICENSE_URL, tempLicense));
+            URL url = new URL(String.format(TEMP_LICENSE_URL, pluginId, tempLicense));
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setConnectTimeout(TIMEOUT_MS);
             connection.setReadTimeout(TIMEOUT_MS);

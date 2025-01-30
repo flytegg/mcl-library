@@ -171,7 +171,7 @@ public class MCLicense {
                 }
 
                 Long deadline = Long.valueOf(responseJson.getString("message"));
-                TempLicenseManager.startPolling(plugin, deadline, key);
+                TempLicenseManager.startPolling(plugin, pluginId, deadline, key);
 
                 Constants.LOGGER.info("License validation succeeded for " + plugin.getName() + "! Your license is temporary while we verify PayPal logs, the permanent one will soon be placed in your mclicense.txt automatically.");
                 return true;
