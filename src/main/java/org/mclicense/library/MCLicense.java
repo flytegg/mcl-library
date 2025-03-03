@@ -54,7 +54,6 @@ public class MCLicense {
                 fileContent = new String(Files.readAllBytes(Paths.get(licenseFile.getPath())), StandardCharsets.UTF_8).trim();
             }
 
-
             // Read the license key from the file
             String key = fileContent;
             if (key.isEmpty()) {
