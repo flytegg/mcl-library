@@ -137,6 +137,7 @@ public class MCLicense {
             return true;
         } catch (Exception e) {
             Constants.LOGGER.info("License validation failed for " + plugin.getName() + " (System error)");
+            e.printStackTrace();
             return false;
         }
     }
@@ -194,6 +195,7 @@ public class MCLicense {
             return isValid;
         } catch (Exception e) {
             Constants.LOGGER.info("License validation failed for " + plugin.getName() + " (System error)");
+            e.printStackTrace();
             return false;
         }
     }
@@ -221,6 +223,7 @@ public class MCLicense {
             return validateLicenseWithServer(plugin, pluginId, key, licenseFile);
         } catch (Exception e) {
             Constants.LOGGER.info("License write and validation failed for " + plugin.getName() + " (System error)");
+            e.printStackTrace();
             return false;
         }
     }
