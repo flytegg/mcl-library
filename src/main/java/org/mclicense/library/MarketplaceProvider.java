@@ -11,7 +11,7 @@ public class MarketplaceProvider {
     private static String bbbLicense = "%%__BBB_LICENSE__%%";
 
     protected static String getHardcodedLicense() {
-        if (!bbbLicense.equals("%%__BBB_LICENSE__%%")) {
+        if (!bbbLicense.startsWith("%%__")) {
             return bbbLicense;
         } else if (pmPlaceholder.equals("1") && !pmLicense.startsWith("%%__")) {
             return "pm_" + pmLicense;
