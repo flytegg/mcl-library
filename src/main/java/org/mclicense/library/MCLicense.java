@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -17,58 +18,21 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
-import java.util.Date;
 import java.util.UUID;
 
 public class MCLicense {
     /**
-     * Validates a license key with the MCLicense validation server.
-     * <p>
-     * This function performs several checks:
-     * <ul>
-     *     <li>Verifies the existence and content of the license file</li>
-     *     <li>Validates the license key with the remote server</li>
-     *     <li>Verifies the response signature for security</li>
-     *     <li>Ensures the response matches the requested plugin and key</li>
-     *     <li>Checks if the license is valid and not expired, reached max IPs, etc</li>
-     * </ul>
-     *
-     * The license key should be placed in a file named 'mclicense.txt' in the plugin's data folder by the user, or be hardcoded by a marketplace.
+     * Internal function that handles the actual license validation with the MCLicense server.
      *
      * @param plugin The JavaPlugin instance requesting validation
      * @param pluginId The unique identifier assigned to your plugin by MCLicense
+     * @param key The license key to validate
      * @return true if the license is valid and active, false otherwise
-     *
-     * @throws Exception for various validation failures (caught internally)
      */
-    public static boolean validateKey(JavaPlugin plugin, String pluginId) {
+    private static boolean validateLicenseWithServer(JavaPlugin plugin, String pluginId, String key, File licenseFile) {
         try {
-            // Check if license file exists or create it
-            File licenseFile = new File(plugin.getDataFolder(), "mclicense.txt");
-            String fileContent = "";
-            if (!licenseFile.exists()) {
-                plugin.getDataFolder().mkdirs();
-                licenseFile.createNewFile();
-            } else {
-                fileContent = new String(Files.readAllBytes(Paths.get(licenseFile.getPath())), StandardCharsets.UTF_8).trim();
-            }
-
-            // Read the license key from the file
-            String key = fileContent;
-            if (key.isEmpty()) {
-                // Assuming first run, use hardcoded if exists, else prompt
-                String hardcodedKey = MarketplaceProvider.getHardcodedLicense();
-                if (hardcodedKey != null) {
-                    key = hardcodedKey;
-                } else {
-                    Constants.LOGGER.info("License key is empty for " + plugin.getName() + "! Place your key in the 'mclicense.txt' file in the plugin folder and restart the server.");
-                    return false;
-                }
-            }
-
-            // Send request to the validation server with properly encoded parameters
-            String nonce = UUID.randomUUID().toString();
             String sessionId = UUID.randomUUID().toString();
+            String nonce = UUID.randomUUID().toString();
 
             // Properly encode all URL components
             String encodedPluginId = URLEncoder.encode(pluginId, StandardCharsets.UTF_8.toString()).replace("+", "%20");
@@ -95,7 +59,7 @@ public class MCLicense {
                 response = responseBuilder.toString();
             }
 
-            // Reject if the response code is not 200 (pre-planned for rejections such as expiry date, max IPs, etc)
+            // Reject if the response code is not 200
             if (connection.getResponseCode() != 200) {
                 try {
                     Constants.LOGGER.info("License validation failed for " + plugin.getName() + " (" + new JSONObject(response).getString("message") + ")");
@@ -153,14 +117,8 @@ public class MCLicense {
 
             HeartbeatManager.startHeartbeat(plugin, pluginId, key, sessionId);
 
-            // First run, key in file not equal to key in jar
-            if (!key.equals(fileContent)) {
-                Files.write(licenseFile.toPath(), key.getBytes(StandardCharsets.UTF_8));
-            }
-
-            // Spigot temp license (which is currently valid)
+            // Handle temporary Spigot license
             if (key.startsWith("sptemp_")) {
-                // If we got back a different key than what we sent, it's our permanent key
                 String returnedKey = responseJson.getString("key");
                 if (!returnedKey.equals(key)) {
                     Files.write(licenseFile.toPath(), returnedKey.getBytes(StandardCharsets.UTF_8));
@@ -179,6 +137,90 @@ public class MCLicense {
             return true;
         } catch (Exception e) {
             Constants.LOGGER.info("License validation failed for " + plugin.getName() + " (System error)");
+            return false;
+        }
+    }
+
+    /**
+     * Validates a license key with the MCLicense validation server.
+     * <p>
+     * This function performs several checks:
+     * <ul>
+     *     <li>Verifies the existence and content of the license file</li>
+     *     <li>Validates the license key with the remote server</li>
+     *     <li>Verifies the response signature for security</li>
+     *     <li>Ensures the response matches the requested plugin and key</li>
+     *     <li>Checks if the license is valid and not expired, reached max IPs, etc</li>
+     * </ul>
+     *
+     * The license key should be placed in a file named 'mclicense.txt' in the plugin's data folder by the user, or be hardcoded by a marketplace.
+     *
+     * @param plugin The JavaPlugin instance requesting validation
+     * @param pluginId The unique identifier assigned to your plugin by MCLicense
+     * @return true if the license is valid and active, false otherwise
+     */
+    public static boolean validateKey(JavaPlugin plugin, String pluginId) {
+        try {
+            // Check if license file exists or create it
+            File licenseFile = new File(plugin.getDataFolder(), "mclicense.txt");
+            String fileContent = "";
+            if (!licenseFile.exists()) {
+                plugin.getDataFolder().mkdirs();
+                licenseFile.createNewFile();
+            } else {
+                fileContent = new String(Files.readAllBytes(Paths.get(licenseFile.getPath())), StandardCharsets.UTF_8).trim();
+            }
+
+            // Read the license key from the file
+            String key = fileContent;
+            if (key.isEmpty()) {
+                // Assuming first run, use hardcoded if exists, else prompt
+                String hardcodedKey = MarketplaceProvider.getHardcodedLicense();
+                if (hardcodedKey != null) {
+                    key = hardcodedKey;
+                } else {
+                    Constants.LOGGER.info("License key is empty for " + plugin.getName() + "! Place your key in the 'mclicense.txt' file in the plugin folder and restart the server.");
+                    return false;
+                }
+            }
+
+            boolean isValid = validateLicenseWithServer(plugin, pluginId, key, licenseFile);
+
+            // First run, key in file not equal to key in jar
+            if (isValid && !key.equals(fileContent)) {
+                Files.write(licenseFile.toPath(), key.getBytes(StandardCharsets.UTF_8));
+            }
+
+            return isValid;
+        } catch (Exception e) {
+            Constants.LOGGER.info("License validation failed for " + plugin.getName() + " (System error)");
+            return false;
+        }
+    }
+
+    /**
+     * Writes a license key to the license file and validates it immediately.
+     *
+     * @param plugin The JavaPlugin instance requesting validation
+     * @param pluginId The unique identifier assigned to your plugin by MCLicense
+     * @return true if the license is valid and active, false otherwise
+     */
+    public static boolean writeAndValidate(JavaPlugin plugin, String pluginId, String key) {
+        try {
+            // Check if license file exists or create it
+            File licenseFile = new File(plugin.getDataFolder(), "mclicense.txt");
+            if (!licenseFile.exists()) {
+                plugin.getDataFolder().mkdirs();
+                licenseFile.createNewFile();
+            }
+
+            // Write key
+            Files.write(licenseFile.toPath(), key.getBytes(StandardCharsets.UTF_8));
+
+            // Validate the license
+            return validateLicenseWithServer(plugin, pluginId, key, licenseFile);
+        } catch (Exception e) {
+            Constants.LOGGER.info("License write and validation failed for " + plugin.getName() + " (System error)");
             return false;
         }
     }
