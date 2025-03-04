@@ -227,5 +227,4 @@ public class MCLicense {
             return false;
         }
     }
-
 }
