@@ -63,7 +63,7 @@ class HeartbeatManager {
             // Create JSON payload
             JSONObject payload = new JSONObject();
             // This really should be changed to sessionId, but will require a lot of backend changes
-            payload.put("serverIp", sessionId);
+            payload.put("sessionId", sessionId);
             if (isShutdown) {
                 payload.put("shutdown", true);
             }

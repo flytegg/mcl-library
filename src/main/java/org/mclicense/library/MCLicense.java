@@ -39,7 +39,7 @@ public class MCLicense {
             String encodedKey = URLEncoder.encode(key, StandardCharsets.UTF_8.toString()).replace("+", "%20");
 
             URL url = new URL(String.format(Constants.API_URL, encodedPluginId, encodedKey) +
-                    "?serverIp=" + sessionId +
+                    "?sessionId=" + sessionId +
                     "&nonce=" + nonce);
 
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
