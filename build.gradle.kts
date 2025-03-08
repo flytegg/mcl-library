@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "org.mclicense"
-version = "1.4.3"
+version = "1.4.5"
 
 repositories {
     maven("https://repo.papermc.io/repository/maven-public/")
