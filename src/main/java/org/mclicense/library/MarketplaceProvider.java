@@ -5,8 +5,8 @@ public class MarketplaceProvider {
     private static String pmPlaceholder = "%%__POLYMART__%%";
     private static String pmLicense = "%%__LICENSE__%%";
 
-    private static String spResource = "%%__RESOURCE__%";
-    private static String spUser = "%%__USER__%";
+    private static String spResource = "%%__RESOURCE__%%";
+    private static String spUser = "%%__USER__%%";
 
     private static String bbbLicense = "%%__BBB_LICENSE__%%";
 
