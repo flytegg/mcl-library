@@ -188,7 +188,7 @@ public class MCLicense {
             boolean isValid = validateLicenseWithServer(plugin, pluginId, key, licenseFile);
 
             // First run, key in file not equal to key in jar
-            if (isValid && !key.equals(fileContent)) {
+            if (isValid && !key.equals(fileContent) && !key.startsWith("sptemp_")) {
                 Files.write(licenseFile.toPath(), key.getBytes(StandardCharsets.UTF_8));
             }
 
